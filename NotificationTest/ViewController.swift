@@ -15,7 +15,9 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+        
+        print("viewDidLoad")
+        
         requestNotificationAuthorization() // 권한 요청 함수 호출
     }
     
@@ -26,7 +28,7 @@ class ViewController: UIViewController {
         content.subtitle = "subtitle"
         content.body = "body"
         content.sound = .default
-        content.badge = 1
+        content.badge = 5
         
         // trigger 정의 (여러 트리거 지원)
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 5, repeats: false)
@@ -47,11 +49,29 @@ class ViewController: UIViewController {
         // 요청할 권한 옵션
         let authOptions: UNAuthorizationOptions = [.alert, .sound, .badge]
         // 권한 요청
-        notificationCenter.requestAuthorization(options: authOptions) { success, error in
+        notificationCenter.requestAuthorization(options: authOptions) { isAllowed, error in
+            
+            self.showAlert(message: isAllowed.description)
+            
+            self.notificationCenter.getNotificationSettings { settings in
+                print(settings.soundSetting.rawValue)
+            }
+            
             // 요청 성공 시 error에 nil 반환
             if let error = error {
                 print(error)
             }
+        }
+    }
+    
+    func showAlert(message: String) {
+        let alert = UIAlertController(title: "알림 허용 여부", message: message, preferredStyle: .alert)
+        
+        let okAction = UIAlertAction(title: "ok", style: .default)
+        alert.addAction(okAction)
+        
+        DispatchQueue.main.async {
+            self.present(alert, animated: false)
         }
     }
 }
